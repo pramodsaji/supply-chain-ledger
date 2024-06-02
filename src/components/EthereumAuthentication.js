@@ -9,6 +9,7 @@ export function EthereumAuthentication() {
   const [loading, setLoading] = useState(true);
   const [address, setAddress] = useState(null);
   const [stakeholderType, setStakeholderType] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   var contract = null;
 
@@ -24,6 +25,8 @@ export function EthereumAuthentication() {
         const accs = await web3Instance.eth.getAccounts();
         if (accs.length > 0) {
           setAddress(accs[0]);
+          localStorage.setItem("address", accs[0]);
+          getStakeholderType();
         }
         setLoading(false);
       } else {
@@ -59,14 +62,14 @@ export function EthereumAuthentication() {
   };
 
   // Function to retrieve the stakeholder type for the current user
-  const getStakeholderType = async (event) => {
-    var web31 = new Web3(
+  const getStakeholderType = async () => {
+    var web3 = new Web3(
       new Web3.providers.HttpProvider("http://localhost:8545")
     );
     try {
-      const networkId = await web31.eth.net.getId();
+      const networkId = await web3.eth.net.getId();
       const deployedNetwork = SupplyChainContract.networks[networkId];
-      contract = new web31.eth.Contract(
+      contract = new web3.eth.Contract(
         SupplyChainContract.abi,
         deployedNetwork && deployedNetwork.address
       );
@@ -75,7 +78,12 @@ export function EthereumAuthentication() {
         .call({
           from: localStorage.getItem("address"),
         });
+      console.log(stakeholder);
       setStakeholderType(stakeholder);
+
+      if (stakeholder === "A") setIsAdmin(true);
+      else setIsAdmin(false);
+
       localStorage.setItem("stakeholderType", stakeholder);
     } catch (error) {
       console.error("Error retrieving data:", error.message);
@@ -108,7 +116,10 @@ export function EthereumAuthentication() {
         <span className="home-link">
           <a href="/">Home</a>
           <span>&nbsp;&nbsp;</span>
-          {stakeholderType === "N" && <a href="/view">Products</a>}
+          {["M", "R", "S", "W"].includes(stakeholderType) && (
+            <a href="/view">Products</a>
+          )}
+          {stakeholderType === "A" && <a href="/admin">Admin Dashboard</a>}
         </span>
 
         <center>

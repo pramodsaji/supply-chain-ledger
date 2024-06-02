@@ -19,7 +19,7 @@ contract ProductSupplyChain {
     }
 
     // Admin address
-    address public admin;
+    address public admin = ; // Add the admin address here
 
     // Lists of addresses for different roles
     address[] public manufacturers;
@@ -89,10 +89,6 @@ contract ProductSupplyChain {
         return ownedProductsLatest;
     }
 
-    constructor() {
-        admin = msg.sender;
-    }
-
     function transferOwnership(uint _productId, address _newOwner) public {
         products[_productId].owner = _newOwner;
 
@@ -105,6 +101,10 @@ contract ProductSupplyChain {
     function findStakeholderType(
         address _address
     ) public view returns (string memory) {
+        if (_address == admin) {
+            return "A"; // Admin
+        }
+
         for (uint i = 0; i < manufacturers.length; i++) {
             if (manufacturers[i] == _address) {
                 return "M"; // Manufacturer
